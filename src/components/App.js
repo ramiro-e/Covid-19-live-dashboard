@@ -1,15 +1,17 @@
 import React from 'react';
-import Header from './Header';
+
 import Main from './Main';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 function App() {
   return (
-    <div>
+    <React.Fragment>
+      <div>
 
-      <Main />
-    </div>
+        <Main />
+      </div>
+    </React.Fragment>
     
   );
 }

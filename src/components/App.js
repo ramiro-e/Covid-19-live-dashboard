@@ -8,7 +8,6 @@ function App() {
   return (
     <React.Fragment>
       <div>
-
         <Main />
       </div>
     </React.Fragment>

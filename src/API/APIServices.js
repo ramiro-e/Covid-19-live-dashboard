@@ -21,44 +21,19 @@ export const APIServices = {
 
     // filtrando datos de cada pais y creando un array de objetos con el atributo country y value
     const propertyArray = ["total_cases", "total_cases_per_million", "new_cases", "new_cases_smoothed", "new_cases_per_million", "new_cases_smoothed_per_million",  "total_deaths", "new_deaths", "new_deaths_smoothed", "new_deaths_per_million", "new_deaths_smoothed_per_million", "total_vaccinations", "total_vaccinations_per_hundred", "new_vaccinations", "new_vaccinations_smoothed", "new_vaccinations_smoothed_per_million", "people_vaccinated", "people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"  ] 
+
     let currentPropertyCountryMetrics = {}
     let propertyNameCamelCase = ""
     let allCountryMetrics = {}
 
-    
+    propertyArray.forEach(element => {
+      currentPropertyCountryMetrics = getCountryPropertyObjectArray(property)
+      allCountryMetrics[property] = currentPropertyCountryMetrics
+    })
 
-    // for(let property of propertyArray){
-    //   currentPropertyCountryMetrics = getCountryPropertyObjectArray(property)
-    //   propertyNameCamelCase = snakeToCamel(property)
-    //   allCountryMetrics[propertyNameCamelCase] = currentPropertyCountryMetrics
-    // }
-
-    console.log(allCountryMetrics)
-
-    // const snakeToCamel = str =>
-    //   str.toLowerCase().replace(/([-_][a-z])/g, group =>
-    //     group
-    //       .toUpperCase()
-    //       .replace('-', '')
-    //       .replace('_', '')
-    //   );
-
-    
-    
-    // propertyArray.forEach(async (property) => {
-    //   // console.log("propertyArray.forEach")
-    //   // console.log(property)
-    //   // let currentPropertyCountryMetrics = getCountryPropertyObjectArray(property)
-    //   // allCountryMetrics[property] = currentPropertyCountryMetrics
-    //   // console.log(currentPropertyCountryMetrics)
-    // })
-    
     const countryMetrics = getCountryPropertyObjectArray("total_cases_per_million")
 
     function getCountryPropertyObjectArray (property){
-      console.log("getCountryPropertyObjectArray")
-      console.log(property)
-      console.log(rawData)
       const countryPropertyObjectArray = []
       rawMetricsKeyArray.forEach(async (key, index) => {
         if (typeof(getCountryISO2(key)) != 'undefined' && typeof(rawData[key].data.pop()[property]) != 'undefined'){
@@ -67,11 +42,6 @@ export const APIServices = {
       })
       return countryPropertyObjectArray
     }
-
-    // function sortObjectByValues () {
-    //   const toBeSorted = getCountryPropertyObjectArray("total_cases_per_million")
-      
-    // }
 
 
     return { globalMetrics, countryMetrics };

@@ -26,7 +26,7 @@ export const APIServices = {
     let propertyNameCamelCase = ""
     let allCountryMetrics = {}
 
-    propertyArray.forEach(element => {
+    propertyArray.forEach(property => {
       currentPropertyCountryMetrics = getCountryPropertyObjectArray(property)
       allCountryMetrics[property] = currentPropertyCountryMetrics
     })

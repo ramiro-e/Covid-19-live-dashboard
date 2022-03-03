@@ -1,12 +1,12 @@
-import getCountryISO2 from 'country-iso-3-to-2'
+import getCountryISO from 'country-iso-3-to-2'
 
 export const APIServices = {
 
   fetchMetrics: async () => {
-    console.log('globalMetrics fetching data')
     const response = await fetch('https://covid.ourworldindata.org/data/owid-covid-data.json');
     const rawData = await response.json();
     const rawMetricsKeyArray = Object.keys(rawData);
+
 
     if(response.status !== 200) {
       return {
@@ -15,35 +15,59 @@ export const APIServices = {
       }    
     }
 
-    // filtrando datos globales
-    const globalMetrics = rawData.OWID_WRL.data.pop()
-    console.log('globalMetrics fetching data success')
+    let countryHistoryMetrics = {}
+    let globalHistoryMetrics = {}
 
-    // filtrando datos de cada pais y creando un array de objetos con el atributo country y value
-    const propertyArray = ["total_cases", "total_cases_per_million", "new_cases", "new_cases_smoothed", "new_cases_per_million", "new_cases_smoothed_per_million",  "total_deaths", "new_deaths", "new_deaths_smoothed", "new_deaths_per_million", "new_deaths_smoothed_per_million", "total_vaccinations", "total_vaccinations_per_hundred", "new_vaccinations", "new_vaccinations_smoothed", "new_vaccinations_smoothed_per_million", "people_vaccinated", "people_vaccinated_per_hundred", "people_fully_vaccinated", "people_fully_vaccinated_per_hundred"  ] 
+    
+    rawMetricsKeyArray.forEach(async (countryCode, index) => {
+      let countryCovidHistoryArray = rawData[countryCode].data 
 
-    let currentPropertyCountryMetrics = {}
-    let propertyNameCamelCase = ""
-    let allCountryMetrics = {}
-
-    propertyArray.forEach(property => {
-      currentPropertyCountryMetrics = getCountryPropertyObjectArray(property)
-      allCountryMetrics[property] = currentPropertyCountryMetrics
-    })
-
-    const countryMetrics = getCountryPropertyObjectArray("total_cases_per_million")
-
-    function getCountryPropertyObjectArray (property){
-      const countryPropertyObjectArray = []
-      rawMetricsKeyArray.forEach(async (key, index) => {
-        if (typeof(getCountryISO2(key)) != 'undefined' && typeof(rawData[key].data.pop()[property]) != 'undefined'){
-          countryPropertyObjectArray.push({country: getCountryISO2(key), value: parseInt(rawData[key].data.pop()[property].toFixed(0))})
+      countryCovidHistoryArray.forEach(async (currentDateData, index) => {
+        let currentDate = currentDateData['date']
+        if(!countryHistoryMetrics[currentDate]){
+          countryHistoryMetrics[currentDate] = {}
         }
+        if(!globalHistoryMetrics[currentDate]){
+          globalHistoryMetrics[currentDate] = {}
+        }
+        delete currentDateData.date
+        let currentDateKeys =  Object.keys(currentDateData)
+
+        currentDateKeys.forEach(async (property, index) => {
+          if(!countryHistoryMetrics[currentDate][property]){
+            countryHistoryMetrics[currentDate][property] = []
+          }
+
+          if(currentDateData[property] && getCountryISO(countryCode) && !countryCode.includes('OWID')){
+            countryHistoryMetrics[currentDate][property].push({country: getCountryISO(countryCode), value:currentDateData[property]})
+            countryHistoryMetrics[currentDate]['date'] = currentDate
+          }
+          if(countryCode.includes('OWID_WRL')){
+            globalHistoryMetrics[currentDate][property] = currentDateData[property]
+            globalHistoryMetrics[currentDate]['date'] = currentDate
+          }
+        })
+
+
       })
-      return countryPropertyObjectArray
+
+    }) 
+
+    let globalDateKeys = Object.keys(globalHistoryMetrics)
+    let countryDateKeys = Object.keys(countryHistoryMetrics)
+
+    console.log(globalDateKeys.reduce((a, b) => (a > b && globalHistoryMetrics[a].total_cases ? a : b)))
+
+    let responseObject = {
+      // globalMetrics: globalHistoryMetrics[globalDateKeys.reduce((a, b) => (a > b ? globalHistoryMetrics[a].total_cases ? a : b : b))], 
+      // countryMetrics: countryHistoryMetrics[countryDateKeys.reduce((a, b) => (a > b ? countryHistoryMetrics[a].total_cases ? a : b : b))],
+      globalMetrics: globalHistoryMetrics[globalDateKeys[900]], 
+      countryMetrics: countryHistoryMetrics[countryDateKeys[900]], 
+      globalHistoryMetrics,
+      countryHistoryMetrics
     }
 
 
-    return { globalMetrics, countryMetrics };
+    return responseObject;
   }
 }

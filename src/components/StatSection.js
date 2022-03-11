@@ -1,55 +1,60 @@
 import React from 'react'
-
 import StatSectionCard from './StatSectionCard';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faUsers, faUserPlus ,faChild, faSkull} from '@fortawesome/free-solid-svg-icons'
 
-
-function StatSection (metrics) {
-
-  const data =  metrics.metrics
-
-
-  const newCases = data.new_cases
-  const newCasesPerMillion = data.new_cases_per_million
-  const newCasesSmoothed = data.new_cases_smoothed
-  const newCasesSmoothedPerMillion = data.new_cases_smoothed_per_million
-  const newDeaths = data.new_deaths
-  const newDeathsPerMillion = data.new_deaths_per_million
-  const newDeathsSmoothed = data.new_deaths_smoothed
-  const newDeathsSmoothedPerMillion = data.new_deaths_smoothed_per_million
-  const newVaccinations = data.new_vaccinations
-  const newVaccinationsSmoothed = data.new_vaccinations_smoothed
-  const newVaccinationsSmoothedPerMillion = data.new_vaccinations_smoothed_per_million
-  const peopleFullyVaccinated = data.people_fully_vaccinated
-  const peopleFullyVaccinatedPerHundred = data.people_fully_vaccinated_per_hundred
-  const peopleVaccinated = data.people_vaccinated
-  const peopleVaccinatedPerHundred = data.people_vaccinated_per_hundred
-  const totalBoosters = data.total_boosters
-  const totalBoostersPerHundred = data.total_boosters_per_hundred
-  const totalCases = data.total_cases
-  const totalCasesPerMillion = data.total_cases_per_million
-  const totalDeaths = data.total_deaths
-  const totalDeathsPerMillion = data.total_deaths_per_million
-  const totalVaccinations = data.total_vaccinations
-  const totalVaccinationsPerHundred = data.total_vaccinations_per_hundred
-
+function StatSection ({globalMetrics, countryMetrics, states:{selectedMetric, officialOrAveraged, totalOrPercapita}, methods:{setSelectedMetric, setOfficialOrAveraged, setTotalOrPercapita, getPerCapitaType}}) {
+  function handleSelectedMetric(newSelectedMetric){
+    if (countryMetrics[newSelectedMetric + officialOrAveraged + getPerCapitaType(newSelectedMetric, countryMetrics)]) {
+      setSelectedMetric(newSelectedMetric)
+    }
+  }
   
+  function handleOfficialOrAveraged(newOfficialOrAveraged){
+    if (countryMetrics[selectedMetric + newOfficialOrAveraged + totalOrPercapita]) {
+      setOfficialOrAveraged(newOfficialOrAveraged)
+    }
+  }
+
+  function handleTotalOrPercapita(newTotalOrPercapita){
+    if (countryMetrics[selectedMetric + officialOrAveraged + newTotalOrPercapita]) {
+      setTotalOrPercapita(newTotalOrPercapita)
+    }
+  }
+
+  function perMillionOrPerHundred(){
+    if(countryMetrics[selectedMetric + officialOrAveraged + '_per_million']){
+      return '_per_million'
+    }
+    if(countryMetrics[selectedMetric + officialOrAveraged + '_per_hundred']){
+      return '_per_hundred'
+    }
+    return ''
+  }
+  
+
   return (
     <React.Fragment>
-      <div className="col-12 col-md-3">		
-        {/* coronavirus cases */}
+      <div className="col-md-4">
+        <div>
+          <div className="border rounded mb-2">
+            <button className={`w-50 border-0 py-2 shadow-none rounded-0 rounded-start ${ countryMetrics[selectedMetric + '' + perMillionOrPerHundred()] ? officialOrAveraged === '' ? 'bg-primary text-white' : 'bg-white' : 'bg-light text-secondary'}`} onClick={()=>{handleOfficialOrAveraged('')}}>Oficial</button>
+            <button className={`w-50 border-0 py-2 shadow-none rounded-0 rounded-end ${ countryMetrics[selectedMetric + '_smoothed' + perMillionOrPerHundred()] ? officialOrAveraged === '_smoothed' ? 'bg-primary text-white' : 'bg-white' : 'bg-light text-secondary'}`} onClick={()=>{handleOfficialOrAveraged('_smoothed')}}>Promedio</button>
+          </div>
+          <div className="border rounded mb-2">
+            <button className={`w-50 border-0 py-2 shadow-none rounded-0 rounded-start ${ countryMetrics[selectedMetric + officialOrAveraged + ''] ? totalOrPercapita === '' ? 'bg-primary text-white' : 'bg-white' : 'bg-light text-secondary'}`} onClick={()=>{handleTotalOrPercapita('')}}>Total</button>
+            <button className={`w-50 border-0 py-2 shadow-none rounded-0 rounded-end ${ countryMetrics[selectedMetric + officialOrAveraged + perMillionOrPerHundred()] ? totalOrPercapita === '_per_hundred' || totalOrPercapita === '_per_million' ? 'bg-primary text-white' : 'bg-white' : 'bg-light text-secondary'}`} onClick={()=>{handleTotalOrPercapita(perMillionOrPerHundred())}}>Per capita</button>
+          </div>
+        </div>
         <div className="row">
-          <StatSectionCard icon="faSkull" title="Total de casos" number={totalCases} />
-          <StatSectionCard icon="faSkull" title="Nuevos casos" number={newCases} />
-          <StatSectionCard icon="faSkull" title="Total de muertes" number={totalDeaths} />
-          <StatSectionCard icon="faSkull" title="Nuevas Muertes" number={newDeaths} />
-          <StatSectionCard icon="faSkull" title="Total de vacunaciones" number={totalVaccinations} />
-          <StatSectionCard icon="faSkull" title="Nuevas vacunaciones" number={newVaccinations} />
-          <StatSectionCard icon="faSkull" title="Personas totalmente vacunadas" number={peopleFullyVaccinated} />
-          <StatSectionCard icon="faSkull" title="Personas vacunadas" number={peopleVaccinated} />
-        </div>{/* /coronavirus cases */}
+          <StatSectionCard  icon="faSkull" title="Total de casos" number={globalMetrics['total_cases'+ officialOrAveraged + getPerCapitaType('total_cases', globalMetrics)]}                                         countryMetricsExists={countryMetrics['total_cases' + officialOrAveraged + getPerCapitaType('total_cases', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='total_cases' />
+          <StatSectionCard  icon="faSkull" title="Nuevos casos" number={globalMetrics['new_cases'+ officialOrAveraged + getPerCapitaType('new_cases', globalMetrics)]}                                               countryMetricsExists={countryMetrics['new_cases' + officialOrAveraged + getPerCapitaType('new_cases', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='new_cases' />
+          <StatSectionCard  icon="faSkull" title="Total de muertes" number={globalMetrics['total_deaths'+ officialOrAveraged + getPerCapitaType('total_deaths', globalMetrics)]}                                     countryMetricsExists={countryMetrics['total_deaths' + officialOrAveraged + getPerCapitaType('total_deaths', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='total_deaths' />
+          <StatSectionCard  icon="faSkull" title="Nuevas Muertes" number={globalMetrics['new_deaths'+ officialOrAveraged + getPerCapitaType('new_deaths', globalMetrics)]}                                           countryMetricsExists={countryMetrics['new_deaths' + officialOrAveraged + getPerCapitaType('new_deaths', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='new_deaths' />
+          <StatSectionCard  icon="faSkull" title="Total de vacunaciones" number={globalMetrics['total_vaccinations'+ officialOrAveraged + getPerCapitaType('total_vaccinations', globalMetrics)]}                    countryMetricsExists={countryMetrics['total_vaccinations' + officialOrAveraged + getPerCapitaType('total_vaccinations', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='total_vaccinations' />
+          <StatSectionCard  icon="faSkull" title="Nuevas vacunaciones" number={globalMetrics['new_vaccinations'+ officialOrAveraged + getPerCapitaType('new_vaccinations', globalMetrics)]}                          countryMetricsExists={countryMetrics['new_vaccinations' + officialOrAveraged + getPerCapitaType('new_vaccinations', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='new_vaccinations' />
+          <StatSectionCard  icon="faSkull" title="Personas vacunadas" number={globalMetrics['people_vaccinated'+ officialOrAveraged + getPerCapitaType('people_vaccinated', globalMetrics)]}                         countryMetricsExists={countryMetrics['people_vaccinated' + officialOrAveraged + getPerCapitaType('people_vaccinated', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='people_vaccinated' />
+          <StatSectionCard  icon="faSkull" title="Personas totalmente vacunadas" number={globalMetrics['people_fully_vaccinated'+ officialOrAveraged + getPerCapitaType('people_fully_vaccinated', globalMetrics)]}  countryMetricsExists={countryMetrics['people_fully_vaccinated' + officialOrAveraged + getPerCapitaType('people_fully_vaccinated', countryMetrics)] ? true : false} handleSelectedMetric={handleSelectedMetric} selectedMetric={selectedMetric} metric='people_fully_vaccinated' />
+        </div>{/* /coronavirus _cases */}
                         
       </div>
     </React.Fragment>

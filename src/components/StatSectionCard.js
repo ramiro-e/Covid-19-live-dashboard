@@ -1,29 +1,32 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faUsers, faUserPlus ,faChild, faSkull} from '@fortawesome/free-solid-svg-icons'
 
+function StatSectionCard ({icon, title, number, countryMetricsExists ,handleSelectedMetric, metric, selectedMetric}) {
 
-function StatSectionCard (props) {
-     
+    function onClickHandler (){
+        handleSelectedMetric(metric)
+    }
+
     return(
         <React.Fragment>
 
-            <div className="col-12 pb-3">
-                <div className="card w-100">					
+            <div className="pb-2">
+                <button className={`card w-100 rounded-3 ${countryMetricsExists ? selectedMetric === metric ? 'alert-primary' : '' : 'bg-light text-secondary'}`} onClick={onClickHandler} >					
                     
-                    <div className="p-2 d-flex justify-content-between">
-                    <div className="p-block text-muted">
-                        <span><FontAwesomeIcon icon={props.icon} /></span>
-                        <span className="">{props.title}</span>
-                    </div>
-                    <div className="p-block case-number">{props.number}</div>
+                    <div className="p-2  w-100  d-flex justify-content-between">
+                        <div className="p-block">
+                            <span className="">{title}</span>
+                        </div>
+                        <div className="p-block case-number">{number}</div>
                     </div>
 
-                </div>
+                </button>
             </div>
 
         </React.Fragment>
     );
+}
+StatSectionCard.defautlProps = {
+    number: "cargando..."
 }
 
 export default StatSectionCard;
